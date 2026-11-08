@@ -1,5 +1,5 @@
 from pathlib import Path
-import re, html
+import re, html, sys
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, KeepTogether, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfbase import pdfmetrics
@@ -60,4 +60,4 @@ def build(file):
  for j,(im,n) in enumerate(previews):x=(j%4)*318+10;y=(j//4)*456+10;sheet.paste(im,(x,y));draw.text((x,y+425),n,fill='black')
  sheet.save(QA/f'{file.stem}-overview.png')
  reader=PdfReader(out);print(f'{out.name}: {len(reader.pages)} pages, {figures} figures, {tables} tables, {sum(len(p.extract_text().split()) for p in reader.pages)} words')
-for file in [BASE/'ARIS.md',BASE/'КИС.md']:build(file)
+for file in ([BASE/(name+'.md') for name in sys.argv[1:]] if len(sys.argv)>1 else [BASE/'ARIS.md',BASE/'КИС.md']):build(file)

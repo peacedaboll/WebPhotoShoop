@@ -18,9 +18,9 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
-    "typescript": "^5.7.3",
-    "vite": "^6.1.0",
+    "prettier": "^3.9.10",
     "tsx": "^4.19.3",
-    "@playwright/test": "^1.51.0"
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0"
   }
 }

@@ -11,7 +11,7 @@ test("Сервер отдаёт приложение и API, ограничив�
     assert.match(await page.text(), /<html lang="ru">/);
     assert.match(page.headers.get("content-type"), /text\/html/);
     const health = await fetch(base + "/api/health");
-    assert.deepEqual(await health.json(), { status: "ok", version: "0.1.0" });
+    assert.deepEqual(await health.json(), { status: "ok", version: "0.3.0" });
     const cap = await fetch(base + "/api/capabilities");
     assert.equal((await cap.json()).maxLayers, 12);
     assert.equal((await fetch(base + "/", { method: "POST" })).status, 405);

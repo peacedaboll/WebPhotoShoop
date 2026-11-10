@@ -8,6 +8,7 @@ import {
 } from "./core/EditorDocument";
 import { adjustPixels } from "./core/filters";
 import { applyPreset, presets } from "./core/presets";
+import { Account } from "./Account";
 type Tool = "move" | "brush" | "eraser" | "text" | "crop";
 const tools: { id: Tool; icon: string; name: string; key: string }[] = [
   { id: "move", icon: "↖", name: "Просмотр", key: "V" },
@@ -112,7 +113,11 @@ export default function App() {
     });
   useEffect(() => {
     const keys = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement).matches("input,textarea,select") || modal)
+      if (
+        (e.target as HTMLElement).matches("input,textarea,select") ||
+        modal ||
+        document.querySelector("dialog[open]")
+      )
         return;
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
         e.preventDefault();
@@ -349,10 +354,11 @@ export default function App() {
         <div className="project-name">
           <strong>{title}</strong>
           <span>
-            Локальный проект <i /> v0.2
+            Локальный проект <i /> v0.3
           </span>
         </div>
         <div className="header-actions">
+          <Account />
           <button onClick={() => setModal("new")} disabled={busy}>
             Новый холст
           </button>
@@ -461,7 +467,7 @@ export default function App() {
           >
             ☼
           </button>
-          <span className="toolbar-end">0.2</span>
+          <span className="toolbar-end">0.3</span>
         </nav>
         <main
           className="stage"
@@ -550,13 +556,26 @@ export default function App() {
             <p>Для активного слоя. Результат можно отменить.</p>
             <div className="preset-buttons">
               {presets.map((preset) => (
-                <button key={preset.id} disabled={busy} onClick={() => safe(() => {
-                  const ctx = d!.active.canvas.getContext("2d")!;
-                  const pixels = ctx.getImageData(0, 0, d!.width, d!.height);
-                  applyPreset(pixels.data, preset.id);
-                  ctx.putImageData(pixels, 0, 0);
-                  commit(`Эффект: ${preset.name}`);
-                })}>{preset.name}</button>
+                <button
+                  key={preset.id}
+                  disabled={busy}
+                  onClick={() =>
+                    safe(() => {
+                      const ctx = d!.active.canvas.getContext("2d")!;
+                      const pixels = ctx.getImageData(
+                        0,
+                        0,
+                        d!.width,
+                        d!.height,
+                      );
+                      applyPreset(pixels.data, preset.id);
+                      ctx.putImageData(pixels, 0, 0);
+                      commit(`Эффект: ${preset.name}`);
+                    })
+                  }
+                >
+                  {preset.name}
+                </button>
               ))}
             </div>
           </div>

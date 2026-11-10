@@ -3,6 +3,7 @@ import { readFile, stat } from "node:fs/promises";
 import os from "node:os";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { createAuth } from "./auth.mjs";
 const root = path.resolve(fileURLToPath(new URL("../dist/", import.meta.url)));
 const mime = {
   ".html": "text/html; charset=utf-8",
@@ -12,35 +13,40 @@ const mime = {
   ".png": "image/png",
   ".json": "application/json; charset=utf-8",
 };
-export function createServer() {
+export function createServer(options = {}) {
+  const auth = createAuth(options);
   return http.createServer(async (req, res) => {
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("Referrer-Policy", "no-referrer");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader(
+      "Content-Security-Policy",
+      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+    );
     try {
+      const url = new URL(req.url, "http://localhost");
+      if (await auth(req, res, url)) return;
       if (!["GET", "HEAD"].includes(req.method)) {
         res
           .writeHead(405, { Allow: "GET, HEAD" })
           .end("Метод не поддерживается");
         return;
       }
-      const url = new URL(req.url, "http://localhost");
       if (url.pathname === "/api/health") {
         res
           .writeHead(200, { "Content-Type": mime[".json"] })
-          .end(JSON.stringify({ status: "ok", version: "0.1.0" }));
+          .end(JSON.stringify({ status: "ok", version: "0.3.0" }));
         return;
       }
       if (url.pathname === "/api/capabilities") {
-        res
-          .writeHead(200, { "Content-Type": mime[".json"] })
-          .end(
-            JSON.stringify({
-              maxPixels: 8000000,
-              maxLayers: 12,
-              formats: ["png", "jpeg", "webp"],
-              storage: "browser-memory",
-            }),
-          );
+        res.writeHead(200, { "Content-Type": mime[".json"] }).end(
+          JSON.stringify({
+            maxPixels: 8000000,
+            maxLayers: 12,
+            formats: ["png", "jpeg", "webp"],
+            storage: "browser-memory",
+          }),
+        );
         return;
       }
       const name = decodeURIComponent(url.pathname);

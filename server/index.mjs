@@ -1,5 +1,6 @@
 import http from "node:http";
 import { readFile, stat } from "node:fs/promises";
+import os from "node:os";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 const root = path.resolve(fileURLToPath(new URL("../dist/", import.meta.url)));
@@ -86,9 +87,18 @@ if (
     );
     process.exitCode = 1;
   });
-  server.listen(Number(process.env.PORT) || 3001, "127.0.0.1", () =>
-    console.log(
-      `WebPhotoShoop: http://127.0.0.1:${Number(process.env.PORT) || 3001}`,
-    ),
-  );
+  const port = Number(process.env.PORT) || 3001;
+  const host = process.env.HOST || "0.0.0.0";
+  server.listen(port, host, () => {
+    console.log(`WebPhotoShoop: http://localhost:${port}`);
+    if (host === "0.0.0.0") {
+      const addresses = Object.values(os.networkInterfaces())
+        .flatMap((interfaces) => interfaces ?? [])
+        .filter((address) => address.family === "IPv4" && !address.internal)
+        .map((address) => address.address);
+      for (const address of new Set(addresses)) {
+        console.log(`В локальной сети: http://${address}:${port}`);
+      }
+    }
+  });
 }

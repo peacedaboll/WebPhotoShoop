@@ -688,3 +688,6 @@ footer [role="status"] {
     display: none;
   }
 }
+.preset-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.preset-buttons button { padding: 8px; font-size: 12px; }
+.properties p { font-size: 12px; color: #a4abb8; }

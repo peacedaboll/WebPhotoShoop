@@ -7,6 +7,7 @@ import {
   copyCanvas,
 } from "./core/EditorDocument";
 import { adjustPixels } from "./core/filters";
+import { applyPreset, presets } from "./core/presets";
 type Tool = "move" | "brush" | "eraser" | "text" | "crop";
 const tools: { id: Tool; icon: string; name: string; key: string }[] = [
   { id: "move", icon: "↖", name: "Просмотр", key: "V" },
@@ -348,7 +349,7 @@ export default function App() {
         <div className="project-name">
           <strong>{title}</strong>
           <span>
-            Локальный проект <i /> v0.1
+            Локальный проект <i /> v0.2
           </span>
         </div>
         <div className="header-actions">
@@ -460,7 +461,7 @@ export default function App() {
           >
             ☼
           </button>
-          <span className="toolbar-end">0.1</span>
+          <span className="toolbar-end">0.2</span>
         </nav>
         <main
           className="stage"
@@ -544,6 +545,21 @@ export default function App() {
           </div>
         </main>
         <aside>
+          <div className="properties">
+            <span className="eyebrow">ЦВЕТОВЫЕ ЭФФЕКТЫ</span>
+            <p>Для активного слоя. Результат можно отменить.</p>
+            <div className="preset-buttons">
+              {presets.map((preset) => (
+                <button key={preset.id} disabled={busy} onClick={() => safe(() => {
+                  const ctx = d!.active.canvas.getContext("2d")!;
+                  const pixels = ctx.getImageData(0, 0, d!.width, d!.height);
+                  applyPreset(pixels.data, preset.id);
+                  ctx.putImageData(pixels, 0, 0);
+                  commit(`Эффект: ${preset.name}`);
+                })}>{preset.name}</button>
+              ))}
+            </div>
+          </div>
           <div className="aside-title">
             <span>РАБОЧАЯ ОБЛАСТЬ</span>
             <span>◧</span>
